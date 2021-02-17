@@ -29,15 +29,14 @@ public class BoidFlockingSystem : SystemBase {
 
         // Get acceleration from flocking behaviours
         var spatialGridCaptured = spatialGrid;
-        var deltaTime = Time.DeltaTime;
         Entities
             .WithReadOnly(spatialGridCaptured)
-            .ForEach((ref BoidComponent boidData, in Translation translation, in Entity entity) => {
+            .ForEach((ref FlockingComponent flocking, in Translation translation, in Entity entity) => {
             var avoidance = float3.zero;
             var cohesion = float3.zero;
             var alignment = float3.zero;
             var neighborCount = 0;
-            boidData.acceleration = float3.zero;
+            flocking.acceleration = float3.zero;
             for (var x = -1; x < 1; x++)
                 for (var y = -1; y < 1; y++)
                     for (var z = -1; z < 1; z++) {
@@ -53,22 +52,21 @@ public class BoidFlockingSystem : SystemBase {
                                 if (distance < steeringDataCaptured.senseRange) {
                                     avoidance += /*(steeringDataCaptured.senseRange - distance) **/ vectorToOther;
                                     cohesion += otherTranslation.Value;
-                                    var otherVelocity = GetComponent<VelocityTrackerComponent>(other).velocity;
+                                    var otherVelocity = GetComponent<BoidComponent>(other).velocity;
                                     alignment += otherVelocity;
                                 }
                             } while (spatialGridCaptured.TryGetNextValue(out other, ref nextIterator));
                         }
                     }
 
-            boidData.acceleration += avoidance * steeringDataCaptured.avoidanceFactor;
+            flocking.acceleration += avoidance * steeringDataCaptured.avoidanceFactor;
             if (neighborCount > 0) {
                 var cohesionDir = cohesion / neighborCount - translation.Value;
                 var alignmentDir = alignment / neighborCount;
-                boidData.acceleration += alignmentDir * steeringDataCaptured.alignmentFactor;
-                boidData.acceleration += cohesionDir * steeringDataCaptured.cohesionFactor;
+                flocking.acceleration += alignmentDir * steeringDataCaptured.alignmentFactor;
+                flocking.acceleration += cohesionDir * steeringDataCaptured.cohesionFactor;
             }
-            boidData.velocity *= steeringDataCaptured.drag; 
-            boidData.velocity += boidData.acceleration * deltaTime * steeringDataCaptured.flockingFactor;
+            flocking.acceleration *= steeringDataCaptured.flockingFactor;
             }).ScheduleParallel();
     }
 

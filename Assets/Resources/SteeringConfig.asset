@@ -13,9 +13,10 @@ MonoBehaviour:
   m_Name: SteeringConfig
   m_EditorClassIdentifier: 
   data:
-    senseRange: 3
-    avoidanceBias: 1
-    cohesionBias: 1
-    alignmentBias: 11.56
-    steeringBias: 0.04
-    drag: 0.65
+    senseRange: 10
+    avoidanceFactor: 1
+    cohesionFactor: 1
+    alignmentFactor: 1
+    flockingFactor: 0.04
+    drag: 0.6
+    worldSize: 48

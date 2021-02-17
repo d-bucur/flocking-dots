@@ -8,6 +8,5 @@ using UnityEngine;
 [GenerateAuthoringComponent]
 public struct BoidComponent : IComponentData
 {
-    public float3 acceleration;
     public float3 velocity;
 }

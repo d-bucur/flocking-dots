@@ -13,6 +13,7 @@ public struct FlockingData {
     public float alignmentFactor;
     public float flockingFactor;
     public float drag;
+    public float worldSize;
 }
 
 [CreateAssetMenu(menuName = "Scriptable Objects/FlockingConfig")]

@@ -8,11 +8,11 @@ using UnityEngine;
 
 public class BoidFlockingSystem : SystemBase {
     private NativeMultiHashMap<int3, Entity> spatialGrid;
-    private SteeringBehaviour steeringData;
+    private FlockingConfig steeringData;
 
     protected override void OnCreate() {
         spatialGrid = new NativeMultiHashMap<int3, Entity>(100, Allocator.Persistent);
-        steeringData = Resources.Load<SteeringBehaviour>("SteeringConfig");
+        steeringData = Resources.Load<FlockingConfig>("SteeringConfig");
     }
 
     protected override void OnUpdate() {

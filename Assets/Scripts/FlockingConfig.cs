@@ -6,7 +6,7 @@ using UnityEngine;
 using UnityEngine.Serialization;
 
 [Serializable]
-public struct BoidsData {
+public struct FlockingData {
     public float senseRange;
     public float avoidanceFactor;
     public float cohesionFactor;
@@ -15,7 +15,7 @@ public struct BoidsData {
     public float drag;
 }
 
-[CreateAssetMenu(menuName = "Scriptable Objects/SteeringBehaviour")]
-public class SteeringBehaviour : ScriptableObject {
-    public BoidsData data;
+[CreateAssetMenu(menuName = "Scriptable Objects/FlockingConfig")]
+public class FlockingConfig : ScriptableObject {
+    public FlockingData data;
 }

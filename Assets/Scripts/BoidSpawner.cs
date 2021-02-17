@@ -5,12 +5,13 @@ using UnityEngine;
 public class BoidSpawner : MonoBehaviour {
     public GameObject boid;
     public int batchSize;
-    public float areaSize;
+    public Transform area;
 
     // Update is called once per frame
     void Update()
     {
         if (Input.GetKey(KeyCode.Space)) {
+            var areaSize = area.localScale.x / 2.0f;
             for (var i = 0; i < batchSize; i++) {
                 var pos = new Vector3(
                     Random.Range(-areaSize, areaSize),

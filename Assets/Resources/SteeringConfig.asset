@@ -14,9 +14,15 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   data:
     senseRange: 10
-    avoidanceFactor: 1
-    cohesionFactor: 1
-    alignmentFactor: 1
+    avoidanceFactor: 2.74
+    cohesionFactor: 49.65
+    alignmentFactor: 50.1
     flockingFactor: 0.04
-    drag: 0.6
-    worldSize: 48
+    target:
+      x: 0
+      y: 0
+      z: 0
+    targetFactor: 0
+    drag: 0.9
+    worldSize: 32
+    isDebugEnabled: 0

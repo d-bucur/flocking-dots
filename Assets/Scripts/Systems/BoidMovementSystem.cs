@@ -22,6 +22,7 @@ public class BoidMovementSystem : SystemBase
         Entities.ForEach((ref Translation transform, ref Rotation rotation, ref BoidComponent boidData, in FlockingComponent flocking) => {
             boidData.velocity *= steeringDataCaptured.drag;
             boidData.velocity += flocking.acceleration * deltaTime;
+            
             var newPos = transform.Value + boidData.velocity;
             var worldSize = steeringDataCaptured.worldSize;
             if (newPos.x > worldSize) newPos.x = -worldSize;

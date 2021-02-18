@@ -1,11 +1,18 @@
+using System;
 using System.Collections;
 using System.Collections.Generic;
+using Unity.Entities;
 using UnityEngine;
+using Random = UnityEngine.Random;
 
 public class BoidSpawner : MonoBehaviour {
     public GameObject boid;
     public int batchSize;
     public Transform area;
+
+    private void Start() {
+        Application.targetFrameRate = -1;
+    }
 
     // Update is called once per frame
     void Update()

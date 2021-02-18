@@ -12,8 +12,11 @@ public struct FlockingData {
     public float cohesionFactor;
     public float alignmentFactor;
     public float flockingFactor;
+    public float3 target;
+    public float targetFactor;
     public float drag;
     public float worldSize;
+    public bool isDebugEnabled;
 }
 
 [CreateAssetMenu(menuName = "Scriptable Objects/FlockingConfig")]

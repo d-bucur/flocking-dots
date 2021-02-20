@@ -27,6 +27,7 @@ public class BoidSpawner : MonoBehaviour {
                 );
                 Instantiate(boid, pos, Quaternion.identity);
             }
+            // TODO spawn boids with same sharedmodel
         }
     }
 }

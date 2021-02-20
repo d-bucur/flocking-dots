@@ -19,7 +19,7 @@ public class BoidFlockingSystem : SystemBase {
     protected override void OnUpdate() {
         // Create spatial hashmap
         var steeringDataCaptured = steeringData.data;
-        spatialGrid.Clear();
+        /*spatialGrid.Clear();
         var boidQuery = GetEntityQuery(typeof(BoidComponent), typeof(Translation));
         if (spatialGrid.Capacity < boidQuery.CalculateEntityCount())
             spatialGrid.Capacity *= 2;
@@ -28,13 +28,17 @@ public class BoidFlockingSystem : SystemBase {
             var key = GetSpatialHash(translation.Value, steeringDataCaptured.senseRange);
             // Debug.Log($"Write {entity} to {key}");
             spatialGridWriter.Add(key, entity);
-        }).Run();
+        }).Run();*/
 
         // Get acceleration from flocking behaviours
-        var spatialGridCaptured = spatialGrid;
-        var allEntities = EntityManager.GetAllEntities();
+        var otherBoidsQuery = GetEntityQuery(
+            ComponentType.ReadOnly<BoidComponent>(),
+            ComponentType.ReadOnly<Translation>()
+        );
+        // TODO is there way to access query entities without allocating an array?
+        var otherEntitiesArray = otherBoidsQuery.ToEntityArray(Allocator.TempJob);
         Entities
-            // .WithReadOnly(spatialGridCaptured)
+            .WithReadOnly(otherEntitiesArray)
             .ForEach((ref FlockingComponent flocking, in Translation translation, in Entity entity) => {
             var position = translation.Value;
             var avoidance = float3.zero;
@@ -43,19 +47,22 @@ public class BoidFlockingSystem : SystemBase {
             var target = float3.zero;
             int neighborCount = 0;
 
-            foreach (var other in allEntities) {
-                if (other == entity || !HasComponent<BoidComponent>(other))
+            var otherBoids = GetComponentDataFromEntity<BoidComponent>(true);
+            var otherTranslations = GetComponentDataFromEntity<Translation>(true);
+
+            foreach (var other in otherEntitiesArray) {
+                if (entity == other)
                     continue;
                 // Debug.Log($"Entity {entity} vs {other}");
-                var otherTranslation = GetComponent<Translation>(other);
+                var otherTranslation = otherTranslations[other];
                 var vectorToOther = position - otherTranslation.Value;
                 var distance = math.length(vectorToOther);
                             
                 if (distance > steeringDataCaptured.senseRange) continue;
                 neighborCount++;
-                cohesion += otherTranslation.Value; // TODO cohesion is broken
+                cohesion += otherTranslation.Value;
                 avoidance += (steeringDataCaptured.senseRange - distance) * vectorToOther;
-                var otherVelocity = GetComponent<BoidComponent>(other).velocity;
+                var otherVelocity = otherBoids[other].velocity;
                 alignment += otherVelocity;
             }
             /*var currentCell = GetSpatialHash(position, steeringDataCaptured.senseRange);
@@ -88,8 +95,9 @@ public class BoidFlockingSystem : SystemBase {
             }
 
             flocking.acceleration = (alignment + avoidance + cohesion + target) * steeringDataCaptured.flockingFactor;
-            }).Run();
-        allEntities.Dispose();
+            })
+            .WithDisposeOnCompletion(otherEntitiesArray)
+            .ScheduleParallel();
     }
 
     protected override void OnDestroy() {

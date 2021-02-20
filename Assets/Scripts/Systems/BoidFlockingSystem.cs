@@ -45,6 +45,7 @@ public class BoidFlockingSystem : SystemBase {
             var cohesion = position;
             var alignment = float3.zero;
             var target = float3.zero;
+            var bounds = float3.zero;
             int neighborCount = 0;
 
             var otherBoids = GetComponentDataFromEntity<BoidComponent>(true);
@@ -82,6 +83,13 @@ public class BoidFlockingSystem : SystemBase {
             cohesion -= position;
             target = steeringDataCaptured.target - position;
             
+            if (math.abs(translation.Value.x) > steeringDataCaptured.worldSize)
+                bounds.x = steeringDataCaptured.worldSize - translation.Value.x;
+            if (math.abs(translation.Value.y) > steeringDataCaptured.worldSize)
+                bounds.y = steeringDataCaptured.worldSize - translation.Value.y;
+            if (math.abs(translation.Value.z) > steeringDataCaptured.worldSize)
+                bounds.z = steeringDataCaptured.worldSize - translation.Value.z;
+            
             alignment *= steeringDataCaptured.alignmentFactor;
             avoidance *= steeringDataCaptured.avoidanceFactor;
             cohesion *= steeringDataCaptured.cohesionFactor;
@@ -92,9 +100,10 @@ public class BoidFlockingSystem : SystemBase {
                 Debug.DrawRay(position, avoidance, Color.red);
                 Debug.DrawRay(position, cohesion, Color.yellow);
                 Debug.DrawRay(position, target, Color.blue);
+                Debug.DrawRay(position, bounds, Color.magenta);
             }
 
-            flocking.acceleration = (alignment + avoidance + cohesion + target) * steeringDataCaptured.flockingFactor;
+            flocking.acceleration = (alignment + avoidance + cohesion + target + bounds) * steeringDataCaptured.flockingFactor;
             })
             .WithDisposeOnCompletion(otherEntitiesArray)
             .ScheduleParallel();

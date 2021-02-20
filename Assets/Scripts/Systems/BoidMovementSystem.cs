@@ -24,13 +24,6 @@ public class BoidMovementSystem : SystemBase
             boidData.velocity += flocking.acceleration * deltaTime;
             
             var newPos = transform.Value + boidData.velocity;
-            var worldSize = steeringDataCaptured.worldSize;
-            if (newPos.x > worldSize) newPos.x = -worldSize;
-            if (newPos.y > worldSize) newPos.y = -worldSize;
-            if (newPos.z > worldSize) newPos.z = -worldSize;
-            if (newPos.x < -worldSize) newPos.x = worldSize;
-            if (newPos.y < -worldSize) newPos.y = worldSize;
-            if (newPos.z < -worldSize) newPos.z = worldSize;
             transform.Value = newPos;
             rotation.Value = quaternion.LookRotationSafe(boidData.velocity, up);
         }).ScheduleParallel();

@@ -94,6 +94,7 @@ public class BoidFlockingSystem : SystemBase {
             avoidance *= steeringDataCaptured.avoidanceFactor;
             cohesion *= steeringDataCaptured.cohesionFactor;
             target *= steeringDataCaptured.targetFactor;
+            bounds *= steeringDataCaptured.boundsFactor;
 
             if (steeringDataCaptured.isDebugEnabled) {
                 Debug.DrawRay(position, alignment, Color.green);
@@ -104,6 +105,9 @@ public class BoidFlockingSystem : SystemBase {
             }
 
             flocking.acceleration = (alignment + avoidance + cohesion + target + bounds) * steeringDataCaptured.flockingFactor;
+            if (math.length(flocking.acceleration) > steeringDataCaptured.maxAcceleration) {
+                flocking.acceleration = math.normalizesafe(flocking.acceleration) * steeringDataCaptured.maxAcceleration;
+            }
             })
             .WithDisposeOnCompletion(otherEntitiesArray)
             .ScheduleParallel();

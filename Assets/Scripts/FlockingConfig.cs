@@ -12,8 +12,10 @@ public struct FlockingData {
     public float cohesionFactor;
     public float alignmentFactor;
     public float flockingFactor;
+    public float boundsFactor;
     public float3 target;
     public float targetFactor;
+    public float maxAcceleration;
     public float drag;
     public float worldSize;
     public bool isDebugEnabled;

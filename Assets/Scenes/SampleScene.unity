@@ -154,7 +154,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   prefab: {fileID: 1167617768403215154, guid: 386d1c929d870b14db62a9cf15f17915, type: 3}
-  batchSize: 25
+  batchSize: 100
 --- !u!4 &91032749
 Transform:
   m_ObjectHideFlags: 0
@@ -513,7 +513,7 @@ Camera:
   far clip plane: 1000
   field of view: 60
   orthographic: 1
-  orthographic size: 30.451946
+  orthographic size: 50.48
   m_Depth: -1
   m_CullingMask:
     serializedVersion: 2
@@ -965,7 +965,7 @@ Transform:
   m_GameObject: {fileID: 1375845007}
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
   m_LocalPosition: {x: 0, y: 0, z: 0}
-  m_LocalScale: {x: 32, y: 32, z: 32}
+  m_LocalScale: {x: 64, y: 64, z: 64}
   m_Children: []
   m_Father: {fileID: 0}
   m_RootOrder: 3
@@ -976,7 +976,7 @@ Mesh:
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_Name: pb_Mesh30442
+  m_Name: pb_Mesh25304
   serializedVersion: 10
   m_SubMeshes:
   - serializedVersion: 2

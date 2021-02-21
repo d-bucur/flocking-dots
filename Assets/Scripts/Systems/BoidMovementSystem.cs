@@ -19,13 +19,13 @@ public class BoidMovementSystem : SystemBase
         var deltaTime = Time.DeltaTime;
         var steeringDataCaptured = steeringData.data;
         var up = new float3(0, 1, 0);
-        Entities.ForEach((ref Translation transform, ref Rotation rotation, ref BoidComponent boidData, in FlockingComponent flocking) => {
-            boidData.velocity *= steeringDataCaptured.drag;
-            boidData.velocity += flocking.acceleration * deltaTime;
+        Entities.ForEach((ref Translation transform, ref Rotation rotation, ref BoidVelocityComponent velocity, in BoidAccelerationComponent acceleration) => {
+            velocity.Value *= steeringDataCaptured.drag;
+            velocity.Value += acceleration.Value * deltaTime;
             
-            var newPos = transform.Value + boidData.velocity;
+            var newPos = transform.Value + velocity.Value;
             transform.Value = newPos;
-            rotation.Value = quaternion.LookRotationSafe(boidData.velocity, up);
+            rotation.Value = quaternion.LookRotationSafe(velocity.Value, up);
         }).ScheduleParallel();
     }
 }

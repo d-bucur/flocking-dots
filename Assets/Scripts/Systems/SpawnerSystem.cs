@@ -8,7 +8,7 @@
 
         protected override void OnCreate() {
             base.OnCreate();
-            Application.targetFrameRate = 30;
+            Application.targetFrameRate = -1;
             _ecbSystem = World.GetOrCreateSystem<EndSimulationEntityCommandBufferSystem>();
         }
 
@@ -19,7 +19,7 @@
             for (int i = 0; i < spawner.batchSize; i++) {
                 var entity = ecb.Instantiate(spawner.prefab);
                 var randomDir = new float3(Random.Range(-1f, 1f), Random.Range(-1f, 1f), Random.Range(-1f, 1f));
-                ecb.SetComponent(entity, new BoidComponent() {velocity = randomDir});
+                ecb.SetComponent(entity, new BoidVelocityComponent() {Value = randomDir});
             }
             _ecbSystem.AddJobHandleForProducer(Dependency);
         }

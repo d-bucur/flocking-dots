@@ -20,11 +20,11 @@ MonoBehaviour:
     flockingFactor: 0.04
     boundsFactor: 5
     target:
-      x: 70.5
+      x: 0
       y: 0
       z: 0
     targetFactor: 0
-    maxAcceleration: 1.68
+    maxAcceleration: 2.76
     drag: 0.9
     worldSize: 32
     isDebugEnabled: 0

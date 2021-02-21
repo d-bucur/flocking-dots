@@ -3,7 +3,7 @@
     using Unity.Mathematics;
 
     public class SpatialMap {
-        // Would be a component if DOTS had a good system for passing native collections between systems
+        // Would be a component if DOTS had a good way of passing native collections between systems
         public static SpatialMap Instance {
             get {
                 if (_instance == null) {

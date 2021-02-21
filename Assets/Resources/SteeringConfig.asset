@@ -13,17 +13,18 @@ MonoBehaviour:
   m_Name: SteeringConfig
   m_EditorClassIdentifier: 
   data:
-    senseRange: 6.79
+    senseRange: 6
     avoidanceFactor: 12.44
     cohesionFactor: 35.9
-    alignmentFactor: 150
+    alignmentFactor: 172.45
     flockingFactor: 0.04
+    boundsFactor: 5
     target:
       x: 70.5
       y: 0
       z: 0
     targetFactor: 0
+    maxAcceleration: 1.68
     drag: 0.9
-    worldSize: 32
-    isDebugEnabled: 1
-    boundsFactor: 5
+    worldSize: 16
+    isDebugEnabled: 0

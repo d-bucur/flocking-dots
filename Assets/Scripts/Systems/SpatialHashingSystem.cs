@@ -18,15 +18,17 @@
         }
 
         protected override void OnUpdate() {
-            var spatialGrid = this.spatialGrid;
             spatialGrid.Clear();
             var steeringDataCaptured = steeringData.data;
             var boidQuery = GetEntityQuery(
                 ComponentType.ReadOnly(typeof(BoidComponent)),
                 ComponentType.ReadOnly(typeof(Translation)));
-            // if (spatialGrid.Capacity < boidQuery.CalculateEntityCount())
-            //     spatialGrid.Capacity *= 2;
-            // var spatialGridWriter = spatialGrid.AsParallelWriter();
+            int valuesCount = boidQuery.CalculateEntityCount() * 27; // each value gets written in 27 cells
+            if (spatialGrid.Capacity < valuesCount) {
+                spatialGrid.Capacity = valuesCount * 2;
+                // Debug.Log($"Resizing map to {spatialGrid.Capacity}");
+            }
+            var spatialGridWriter = spatialGrid.AsParallelWriter();
             // TODO parallel writer not reallocating size correctly
             // Debug.Log("==============New hashmap============");
 
@@ -37,11 +39,11 @@
                     for (var y = -1; y <= 1; y++) {
                         for (var z = -1; z <= 1; z++) {
                             var writeKey = key + new int3(x, y, z);
-                            spatialGrid.Add(writeKey, entity);
+                            spatialGridWriter.Add(writeKey, entity);
                         }
                     }
                 }
-            }).Schedule();
+            }).ScheduleParallel();
             gridWriterHandle = Dependency;
         }
 

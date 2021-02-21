@@ -3,32 +3,23 @@ using System.Collections;
 using System.Collections.Generic;
 using Unity.Collections;
 using Unity.Entities;
+using Unity.Jobs;
 using Unity.Mathematics;
 using Unity.Transforms;
 using UnityEngine;
 
+[UpdateAfter(typeof(SpatialHashingSystem))]  // TODO remove dependency
 public class BoidFlockingSystem : SystemBase {
-    private NativeMultiHashMap<int3, Entity> spatialGrid;
     private FlockingConfig steeringData;
 
     protected override void OnCreate() {
-        spatialGrid = new NativeMultiHashMap<int3, Entity>(100, Allocator.Persistent);
         steeringData = Resources.Load<FlockingConfig>("SteeringConfig");
     }
 
     protected override void OnUpdate() {
-        // Create spatial hashmap
-        var steeringDataCaptured = steeringData.data;
-        /*spatialGrid.Clear();
-        var boidQuery = GetEntityQuery(typeof(BoidComponent), typeof(Translation));
-        if (spatialGrid.Capacity < boidQuery.CalculateEntityCount())
-            spatialGrid.Capacity *= 2;
-        var spatialGridWriter = spatialGrid.AsParallelWriter();
-        Entities.ForEach((in BoidComponent boidData, in Translation translation, in Entity entity) => {
-            var key = GetSpatialHash(translation.Value, steeringDataCaptured.senseRange);
-            // Debug.Log($"Write {entity} to {key}");
-            spatialGridWriter.Add(key, entity);
-        }).Run();*/
+        // Get spatial hashmap
+        var spatialHashingSystem = World.GetOrCreateSystem<SpatialHashingSystem>();
+        var spatialGrid = spatialHashingSystem.spatialGrid;
 
         // Get acceleration from flocking behaviours
         var otherBoidsQuery = GetEntityQuery(
@@ -36,94 +27,73 @@ public class BoidFlockingSystem : SystemBase {
             ComponentType.ReadOnly<Translation>()
         );
         // TODO is there way to access query entities without allocating an array?
-        var otherEntitiesArray = otherBoidsQuery.ToEntityArray(Allocator.TempJob);
-        Entities
-            .WithReadOnly(otherEntitiesArray)
+        var steeringDataCaptured = steeringData.data;
+        var jobHandle = Entities
+            .WithReadOnly(spatialGrid)
             .ForEach((ref FlockingComponent flocking, in Translation translation, in Entity entity) => {
-            var position = translation.Value;
-            var avoidance = float3.zero;
-            var cohesion = position;
-            var alignment = float3.zero;
-            var target = float3.zero;
-            var bounds = float3.zero;
-            int neighborCount = 0;
+                // TODO break into smaller functions
+                var position = translation.Value;
+                var avoidance = float3.zero;
+                var cohesion = position;
+                var alignment = float3.zero;
+                var target = float3.zero;
+                var bounds = float3.zero;
+                int neighborCount = 0;
 
-            var otherBoids = GetComponentDataFromEntity<BoidComponent>(true);
-            var otherTranslations = GetComponentDataFromEntity<Translation>(true);
+                var otherBoids = GetComponentDataFromEntity<BoidComponent>(true);
+                var otherTranslations = GetComponentDataFromEntity<Translation>(true);
 
-            foreach (var other in otherEntitiesArray) {
-                if (entity == other)
-                    continue;
-                // Debug.Log($"Entity {entity} vs {other}");
-                var otherTranslation = otherTranslations[other];
-                var vectorToOther = position - otherTranslation.Value;
-                var distance = math.length(vectorToOther);
-                            
-                if (distance > steeringDataCaptured.senseRange) continue;
-                neighborCount++;
-                cohesion += otherTranslation.Value;
-                avoidance += (steeringDataCaptured.senseRange - distance) * vectorToOther;
-                var otherVelocity = otherBoids[other].velocity;
-                alignment += otherVelocity;
-            }
-            /*var currentCell = GetSpatialHash(position, steeringDataCaptured.senseRange);
-            for (var x = -1; x < 1; x++) {
-                for (var y = -1; y < 1; y++)
-                    for (var z = -1; z < 1; z++) {
-                        var comparedCell = currentCell + new int3(x, y, z);
-                        // var others = spatialGridCaptured.GetValuesForKey(comparedCell);
-                        // TODO grid reading does not return correct result
-                        
-                    }
-            }*/
-            if (neighborCount > 0) {
-                cohesion /= (float)neighborCount + 1;
-                alignment /= neighborCount;
-            }
-            cohesion -= position;
-            target = steeringDataCaptured.target - position;
-            
-            if (math.abs(translation.Value.x) > steeringDataCaptured.worldSize)
-                bounds.x = steeringDataCaptured.worldSize - translation.Value.x;
-            if (math.abs(translation.Value.y) > steeringDataCaptured.worldSize)
-                bounds.y = steeringDataCaptured.worldSize - translation.Value.y;
-            if (math.abs(translation.Value.z) > steeringDataCaptured.worldSize)
-                bounds.z = steeringDataCaptured.worldSize - translation.Value.z;
-            
-            alignment *= steeringDataCaptured.alignmentFactor;
-            avoidance *= steeringDataCaptured.avoidanceFactor;
-            cohesion *= steeringDataCaptured.cohesionFactor;
-            target *= steeringDataCaptured.targetFactor;
-            bounds *= steeringDataCaptured.boundsFactor;
+                var positionKey = SpatialHashingSystem.GetSpatialHash(position, steeringDataCaptured.senseRange);
+                var others = spatialGrid.GetValuesForKey(positionKey);
+                foreach (var other in others) {
+                    if (entity == other)
+                        continue;
+                    // Debug.Log($"Entity {entity} vs {other}");
+                    var otherTranslation = otherTranslations[other];
+                    var vectorToOther = position - otherTranslation.Value;
+                    var distance = math.length(vectorToOther);
+                
+                    if (distance > steeringDataCaptured.senseRange) continue;
+                    neighborCount++;
+                    cohesion += otherTranslation.Value;
+                    avoidance += (steeringDataCaptured.senseRange - distance) * vectorToOther;
+                    var otherVelocity = otherBoids[other].velocity;
+                    alignment += otherVelocity;
+                }
+                if (neighborCount > 0) {
+                    cohesion /= (float)neighborCount + 1;
+                    alignment /= neighborCount;
+                }
+                cohesion -= position;
+                target = steeringDataCaptured.target - position;
 
-            if (steeringDataCaptured.isDebugEnabled) {
-                Debug.DrawRay(position, alignment, Color.green);
-                Debug.DrawRay(position, avoidance, Color.red);
-                Debug.DrawRay(position, cohesion, Color.yellow);
-                Debug.DrawRay(position, target, Color.blue);
-                Debug.DrawRay(position, bounds, Color.magenta);
-            }
+                if (math.abs(translation.Value.x) > steeringDataCaptured.worldSize)
+                    bounds.x = steeringDataCaptured.worldSize - translation.Value.x;
+                if (math.abs(translation.Value.y) > steeringDataCaptured.worldSize)
+                    bounds.y = steeringDataCaptured.worldSize - translation.Value.y;
+                if (math.abs(translation.Value.z) > steeringDataCaptured.worldSize)
+                    bounds.z = steeringDataCaptured.worldSize - translation.Value.z;
 
-            flocking.acceleration = (alignment + avoidance + cohesion + target + bounds) * steeringDataCaptured.flockingFactor;
-            if (math.length(flocking.acceleration) > steeringDataCaptured.maxAcceleration) {
-                flocking.acceleration = math.normalizesafe(flocking.acceleration) * steeringDataCaptured.maxAcceleration;
-            }
+                alignment *= steeringDataCaptured.alignmentFactor;
+                avoidance *= steeringDataCaptured.avoidanceFactor;
+                cohesion *= steeringDataCaptured.cohesionFactor;
+                target *= steeringDataCaptured.targetFactor;
+                bounds *= steeringDataCaptured.boundsFactor;
+
+                if (steeringDataCaptured.isDebugEnabled) {
+                    Debug.DrawRay(position, alignment, Color.green);
+                    Debug.DrawRay(position, avoidance, Color.red);
+                    Debug.DrawRay(position, cohesion, Color.yellow);
+                    Debug.DrawRay(position, target, Color.blue);
+                    Debug.DrawRay(position, bounds, Color.magenta);
+                }
+
+                flocking.acceleration = (alignment + avoidance + cohesion + target + bounds) * steeringDataCaptured.flockingFactor;
+                if (math.length(flocking.acceleration) > steeringDataCaptured.maxAcceleration) {
+                    flocking.acceleration = math.normalizesafe(flocking.acceleration) * steeringDataCaptured.maxAcceleration;
+                }
             })
-            .WithDisposeOnCompletion(otherEntitiesArray)
-            .ScheduleParallel();
+            .ScheduleParallel(spatialHashingSystem.gridWriterHandle);
+        Dependency = JobHandle.CombineDependencies(Dependency, jobHandle);
     }
-
-    protected override void OnDestroy() {
-        spatialGrid.Dispose();
-    }
-
-    private static int3 GetSpatialHash(in float3 pos, float cellSize) {
-        return new int3(
-            (int)math.floor(pos.x/cellSize),
-            (int)math.floor(pos.y/cellSize),
-            (int)math.floor(pos.z/cellSize)
-        );
-    }
-    
-    
 }

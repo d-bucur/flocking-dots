@@ -7,13 +7,13 @@
 
     public class SpatialHashingSystem : SystemBase {
         // TODO move to singleton
-        public NativeMultiHashMap<int3, Entity> spatialGrid;
+        public NativeMultiHashMap<int3, SpatialMapValue> spatialGrid;
         public JobHandle gridWriterHandle;
         private FlockingConfig steeringData;
 
         protected override void OnCreate() {
             base.OnCreate();
-            spatialGrid = new NativeMultiHashMap<int3, Entity>(5, Allocator.Persistent);
+            spatialGrid = new NativeMultiHashMap<int3, SpatialMapValue>(5, Allocator.Persistent);
             steeringData = Resources.Load<FlockingConfig>("SteeringConfig");
         }
 
@@ -29,8 +29,6 @@
                 // Debug.Log($"Resizing map to {spatialGrid.Capacity}");
             }
             var spatialGridWriter = spatialGrid.AsParallelWriter();
-            // TODO parallel writer not reallocating size correctly
-            // Debug.Log("==============New hashmap============");
 
             Entities.ForEach((in BoidComponent boidData, in Translation translation, in Entity entity) => {
                 var key = GetSpatialHash(translation.Value, steeringDataCaptured.senseRange);
@@ -39,7 +37,11 @@
                     for (var y = -1; y <= 1; y++) {
                         for (var z = -1; z <= 1; z++) {
                             var writeKey = key + new int3(x, y, z);
-                            spatialGridWriter.Add(writeKey, entity);
+                            var v = new SpatialMapValue() {
+                                translation = translation.Value,
+                                velocity = boidData.velocity
+                            };
+                            spatialGridWriter.Add(writeKey, v);
                         }
                     }
                 }

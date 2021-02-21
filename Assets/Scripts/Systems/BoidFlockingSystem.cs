@@ -22,11 +22,6 @@ public class BoidFlockingSystem : SystemBase {
         var spatialGrid = spatialHashingSystem.spatialGrid;
 
         // Get acceleration from flocking behaviours
-        var otherBoidsQuery = GetEntityQuery(
-            ComponentType.ReadOnly<BoidComponent>(),
-            ComponentType.ReadOnly<Translation>()
-        );
-        // TODO is there way to access query entities without allocating an array?
         var steeringDataCaptured = steeringData.data;
         var jobHandle = Entities
             .WithReadOnly(spatialGrid)
@@ -38,27 +33,20 @@ public class BoidFlockingSystem : SystemBase {
                 var alignment = float3.zero;
                 var target = float3.zero;
                 var bounds = float3.zero;
+
                 int neighborCount = 0;
-
-                var otherBoids = GetComponentDataFromEntity<BoidComponent>(true);
-                var otherTranslations = GetComponentDataFromEntity<Translation>(true);
-
                 var positionKey = SpatialHashingSystem.GetSpatialHash(position, steeringDataCaptured.senseRange);
                 var others = spatialGrid.GetValuesForKey(positionKey);
                 foreach (var other in others) {
-                    if (entity == other)
-                        continue;
                     // Debug.Log($"Entity {entity} vs {other}");
-                    var otherTranslation = otherTranslations[other];
-                    var vectorToOther = position - otherTranslation.Value;
+                    var vectorToOther = position - other.translation;
                     var distance = math.length(vectorToOther);
                 
-                    if (distance > steeringDataCaptured.senseRange) continue;
+                    if (distance > steeringDataCaptured.senseRange || distance == 0f) continue;
                     neighborCount++;
-                    cohesion += otherTranslation.Value;
+                    cohesion += other.translation;
                     avoidance += (steeringDataCaptured.senseRange - distance) * vectorToOther;
-                    var otherVelocity = otherBoids[other].velocity;
-                    alignment += otherVelocity;
+                    alignment += other.velocity;
                 }
                 if (neighborCount > 0) {
                     cohesion /= (float)neighborCount + 1;

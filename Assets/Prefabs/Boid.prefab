@@ -46,7 +46,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: c215f211a9526b641a2fdf11fd157d5f, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  velocity:
+  Value:
     x: 0
     y: 0
     z: 0
@@ -62,7 +62,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 7a897e7463594872b02d4d61c7d627b4, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  acceleration:
+  Value:
     x: 0
     y: 0
     z: 0
@@ -85,6 +85,7 @@ MeshRenderer:
   m_RenderingLayerMask: 257
   m_RendererPriority: 0
   m_Materials:
+  - {fileID: 2100000, guid: d34729c77cfd88e4081e7298768a2054, type: 2}
   - {fileID: 2100000, guid: d34729c77cfd88e4081e7298768a2054, type: 2}
   m_StaticBatchInfo:
     firstSubMesh: 0
@@ -114,4 +115,4 @@ MeshFilter:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1167617768403215154}
-  m_Mesh: {fileID: 10202, guid: 0000000000000000e000000000000000, type: 0}
+  m_Mesh: {fileID: -1258736543099589447, guid: 300e6c81d7568734482139ea76103a42, type: 3}

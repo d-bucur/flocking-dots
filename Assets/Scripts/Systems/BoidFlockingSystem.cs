@@ -1,6 +1,3 @@
-using System;
-using System.Collections;
-using System.Collections.Generic;
 using Unity.Collections;
 using Unity.Entities;
 using Unity.Jobs;
@@ -82,8 +79,12 @@ public class BoidFlockingSystem : SystemBase {
 
         BoidAccelerationComponent acceleration;
         acceleration.Value = (alignment + avoidance + cohesion + target + bounds) * steeringConfig.flockingFactor;
-        if (math.length(acceleration.Value) > steeringConfig.maxAcceleration) {
+        float accelLength = math.length(acceleration.Value);
+        if (accelLength > steeringConfig.maxAcceleration) {
             acceleration.Value = math.normalizesafe(acceleration.Value) * steeringConfig.maxAcceleration;
+        }
+        else if (accelLength < steeringConfig.minAcceleration) {
+            acceleration.Value = math.normalizesafe(acceleration.Value, new float3(1,1,1)) * steeringConfig.minAcceleration;
         }
 
         return acceleration;

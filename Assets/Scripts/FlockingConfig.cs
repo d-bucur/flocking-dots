@@ -16,6 +16,7 @@ public struct FlockingData {
     public float3 target;
     public float targetFactor;
     public float maxAcceleration;
+    public float minAcceleration;
     public float drag;
     public float worldSize;
     public bool isDebugEnabled;

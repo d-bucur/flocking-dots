@@ -3,6 +3,8 @@ using Unity.Collections;
 using Unity.Entities;
 using Unity.Jobs;
 using Unity.Mathematics;
+using Unity.Physics;
+using Unity.Physics.Extensions;
 using Unity.Transforms;
 using UnityEngine;
 
@@ -19,13 +21,15 @@ public class BoidMovementSystem : SystemBase
         var deltaTime = Time.DeltaTime;
         var steeringDataCaptured = steeringData.data;
         var up = new float3(0, 1, 0);
-        Entities.ForEach((ref Translation transform, ref Rotation rotation, ref BoidVelocityComponent velocity, in BoidAccelerationComponent acceleration) => {
-            velocity.Value *= steeringDataCaptured.drag;
-            velocity.Value += acceleration.Value * deltaTime;
-            
-            var newPos = transform.Value + velocity.Value;
-            transform.Value = newPos;
-            rotation.Value = quaternion.LookRotationSafe(velocity.Value, up);
+        Entities.ForEach((
+            ref Rotation rotation, 
+            ref PhysicsVelocity velocity,
+            in BoidTag tag, 
+            in BoidAccelerationComponent acceleration
+        ) => {
+            // velocity.Value *= steeringDataCaptured.drag; // TODO enable drag
+            velocity.Linear += acceleration.Value * deltaTime;
+            rotation.Value = quaternion.LookRotationSafe(velocity.Linear, up);
         }).ScheduleParallel();
     }
 }

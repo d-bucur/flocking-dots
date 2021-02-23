@@ -1,5 +1,6 @@
     using Unity.Entities;
     using Unity.Mathematics;
+    using Unity.Physics;
     using UnityEngine;
     using Random = UnityEngine.Random;
 
@@ -19,7 +20,7 @@
             for (int i = 0; i < spawner.batchSize; i++) {
                 var entity = ecb.Instantiate(spawner.prefab);
                 var randomDir = new float3(Random.Range(-1f, 1f), Random.Range(-1f, 1f), Random.Range(-1f, 1f));
-                ecb.SetComponent(entity, new BoidVelocityComponent() {Value = randomDir});
+                ecb.SetComponent(entity, new PhysicsVelocity() {Linear = randomDir});
             }
             _ecbSystem.AddJobHandleForProducer(Dependency);
         }

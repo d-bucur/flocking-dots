@@ -7,7 +7,6 @@ using UnityEngine.Serialization;
 
 [Serializable]
 [GenerateAuthoringComponent]
-public struct BoidVelocityComponent : IComponentData
+public struct BoidTag : IComponentData
 {
-    public float3 Value;
 }

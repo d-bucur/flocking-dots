@@ -1,9 +1,6 @@
 using System;
-using System.Collections;
-using System.Collections.Generic;
 using Unity.Mathematics;
 using UnityEngine;
-using UnityEngine.Serialization;
 
 [Serializable]
 public struct FlockingData {
@@ -20,6 +17,8 @@ public struct FlockingData {
     public float drag;
     public float worldSize;
     public bool isDebugEnabled;
+    public float lookForwardDistance;
+    public float obstacleAvoidanceFactor;
 }
 
 [CreateAssetMenu(menuName = "Scriptable Objects/FlockingConfig")]

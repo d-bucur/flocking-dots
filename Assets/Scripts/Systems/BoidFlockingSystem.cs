@@ -2,8 +2,10 @@ using Unity.Collections;
 using Unity.Entities;
 using Unity.Jobs;
 using Unity.Mathematics;
+using Unity.Physics;
 using Unity.Transforms;
 using UnityEngine;
+using RaycastHit = Unity.Physics.RaycastHit;
 
 [UpdateAfter(typeof(SpatialHashingSystem))]  // TODO horrible dependencies
 public class BoidFlockingSystem : SystemBase {
@@ -19,18 +21,24 @@ public class BoidFlockingSystem : SystemBase {
 
         // Get acceleration from flocking behaviours
         var steeringDataCaptured = steeringData.data;
+        var inputDependencies = JobHandle.CombineDependencies(
+            SpatialMap.Instance.gridWriterHandle, ForwardRaycastSystem.writeHandle
+        );
         var jobHandle = Entities
             .WithReadOnly(spatialGrid)
             .WithName("FlockingBehaviours")
-            .ForEach((ref BoidAccelerationComponent acceleration, in Translation translation) => {
-                acceleration = CalculateSteeringForces(translation, steeringDataCaptured, spatialGrid);
+            .ForEach((ref BoidAccelerationComponent acceleration, in Translation translation, in BoidForwardRaycastComponent rayResult) => {
+                acceleration = CalculateSteeringForces(
+                    translation, steeringDataCaptured, spatialGrid, rayResult
+                    );
             })
-            .ScheduleParallel(SpatialMap.Instance.gridWriterHandle);
+            .ScheduleParallel(inputDependencies);
         Dependency = JobHandle.CombineDependencies(Dependency, jobHandle);
     }
 
     private static BoidAccelerationComponent CalculateSteeringForces(in Translation translation,
-        in FlockingData steeringConfig, in NativeMultiHashMap<int3, SpatialMapSingleValue> spatialGrid) {
+        in FlockingData steeringConfig, in NativeMultiHashMap<int3, SpatialMapSingleValue> spatialGrid,
+        BoidForwardRaycastComponent rayResult) {
         var position = translation.Value;
         var avoidance = float3.zero;
         var cohesion = position;
@@ -69,6 +77,13 @@ public class BoidFlockingSystem : SystemBase {
             bounds.z = steeringConfig.worldSize - translation.Value.z;
         bounds *= steeringConfig.boundsFactor;
 
+        var obstacleAvoidance = float3.zero;
+        if (math.all(rayResult.surfaceNormal != float3.zero)) {
+            var dirToHit = rayResult.hitPosition - position;
+            var reflection = math.reflect(dirToHit, rayResult.surfaceNormal);
+            obstacleAvoidance = reflection + steeringConfig.obstacleAvoidanceFactor;
+        }
+
         if (steeringConfig.isDebugEnabled) {
             Debug.DrawRay(position, alignment, Color.green);
             Debug.DrawRay(position, avoidance, Color.red);
@@ -78,7 +93,7 @@ public class BoidFlockingSystem : SystemBase {
         }
 
         BoidAccelerationComponent acceleration;
-        acceleration.Value = (alignment + avoidance + cohesion + target + bounds) * steeringConfig.flockingFactor;
+        acceleration.Value = (alignment + avoidance + cohesion + target + bounds + obstacleAvoidance) * steeringConfig.flockingFactor;
         float accelLength = math.length(acceleration.Value);
         if (accelLength > steeringConfig.maxAcceleration) {
             acceleration.Value = math.normalizesafe(acceleration.Value) * steeringConfig.maxAcceleration;

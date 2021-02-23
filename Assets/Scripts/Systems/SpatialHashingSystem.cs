@@ -1,7 +1,6 @@
-    using Unity.Collections;
     using Unity.Entities;
-    using Unity.Jobs;
     using Unity.Mathematics;
+    using Unity.Physics;
     using Unity.Transforms;
     using UnityEngine;
 
@@ -18,8 +17,10 @@
             spatialGrid.Clear();
             var steeringDataCaptured = steeringData.data;
             var boidQuery = GetEntityQuery(
-                ComponentType.ReadOnly(typeof(BoidVelocityComponent)),
-                ComponentType.ReadOnly(typeof(Translation)));
+                ComponentType.ReadOnly(typeof(BoidTag)),
+                ComponentType.ReadOnly(typeof(Translation)),
+                ComponentType.ReadOnly(typeof(PhysicsVelocity))
+            );
             int valuesCount = boidQuery.CalculateEntityCount() * 27; // each value gets written in 27 cells
             if (spatialGrid.Capacity < valuesCount) {
                 spatialGrid.Capacity = valuesCount * 2;
@@ -27,7 +28,7 @@
             }
             var spatialGridWriter = spatialGrid.AsParallelWriter();
 
-            Entities.ForEach((in BoidVelocityComponent boidData, in Translation translation, in Entity entity) => {
+            Entities.ForEach((in BoidTag tag, in Translation translation, in Entity entity, in PhysicsVelocity velocity) => {
                 var key = SpatialMap.GetSpatialHash(translation.Value, steeringDataCaptured.senseRange);
                 // Debug.Log($"Hashmap Write {entity} to {key} and around");
                 for (var x = -1; x <= 1; x++) {
@@ -36,7 +37,7 @@
                             var writeKey = key + new int3(x, y, z);
                             var v = new SpatialMapSingleValue() {
                                 Translation = translation.Value,
-                                Velocity = boidData.Value
+                                Velocity = velocity.Linear
                             };
                             spatialGridWriter.Add(writeKey, v);
                         }

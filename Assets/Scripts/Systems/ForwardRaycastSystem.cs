@@ -1,12 +1,11 @@
     using Unity.Entities;
-    using Unity.Jobs;
     using Unity.Mathematics;
     using Unity.Physics;
+    using Unity.Physics.Systems;
     using Unity.Transforms;
     using UnityEngine;
 
     public class ForwardRaycastSystem : SystemBase {
-        public static JobHandle writeHandle;
         private FlockingConfig steeringData;
 
         protected override void OnCreate() {
@@ -14,7 +13,7 @@
         }
         
         protected override void OnUpdate() {
-            var physicsWorldSystem = World.DefaultGameObjectInjectionWorld.GetExistingSystem<Unity.Physics.Systems.BuildPhysicsWorld>();
+            var physicsWorldSystem = World.DefaultGameObjectInjectionWorld.GetExistingSystem<BuildPhysicsWorld>();
             var collisionWorld = physicsWorldSystem.PhysicsWorld.CollisionWorld;
             var collisionFilter = new CollisionFilter()
             {
@@ -26,14 +25,16 @@
             Entities
                 .WithReadOnly(collisionWorld)
                 .ForEach((ref BoidForwardRaycastComponent result, in Translation translation, in PhysicsVelocity velocity) => {
+                    result.surfaceNormal = float3.zero;
+                    if (steeringData.obstacleAvoidanceFactor == 0)
+                        return;
+                    
                     var position = translation.Value;
-                    RaycastInput input = new RaycastInput()
-                    {
+                    var input = new RaycastInput {
                         Start = position,
                         End = position + math.normalizesafe(velocity.Linear) * steeringData.lookForwardDistance,
                         Filter = collisionFilter
                     };
-
                     bool haveHit = collisionWorld.CastRay(input, out var hit);
                     if (!haveHit) return;
                     var dirToHit = hit.Position - position;
@@ -43,7 +44,7 @@
                     result.hitPosition = hit.Position;
                     result.surfaceNormal = hit.SurfaceNormal;
                 })
-                .Schedule();
-            writeHandle = Dependency;
+                .ScheduleParallel();
+            BoidForwardRaycastComponent.writerHandle = Dependency;
         }
     }

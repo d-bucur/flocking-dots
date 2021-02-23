@@ -2,10 +2,8 @@ using Unity.Collections;
 using Unity.Entities;
 using Unity.Jobs;
 using Unity.Mathematics;
-using Unity.Physics;
 using Unity.Transforms;
 using UnityEngine;
-using RaycastHit = Unity.Physics.RaycastHit;
 
 [UpdateAfter(typeof(SpatialHashingSystem))]  // TODO horrible dependencies
 public class BoidFlockingSystem : SystemBase {
@@ -22,7 +20,7 @@ public class BoidFlockingSystem : SystemBase {
         // Get acceleration from flocking behaviours
         var steeringDataCaptured = steeringData.data;
         var inputDependencies = JobHandle.CombineDependencies(
-            SpatialMap.Instance.gridWriterHandle, ForwardRaycastSystem.writeHandle
+            SpatialMap.Instance.gridWriterHandle, BoidForwardRaycastComponent.writerHandle
         );
         var jobHandle = Entities
             .WithReadOnly(spatialGrid)

@@ -37,12 +37,13 @@
                     };
                     bool haveHit = collisionWorld.CastRay(input, out var hit);
                     if (!haveHit) return;
-                    var dirToHit = hit.Position - position;
-                    var reflection = math.reflect(dirToHit, hit.SurfaceNormal);
-                    Debug.DrawRay(position, dirToHit, Color.red);
-                    Debug.DrawRay(hit.Position, reflection, Color.yellow);
+                    
                     result.hitPosition = hit.Position;
                     result.surfaceNormal = hit.SurfaceNormal;
+                    
+                    if (!steeringData.isDebugEnabled) return;
+                    var dirToHit = hit.Position - position;
+                    var reflection = math.reflect(dirToHit, hit.SurfaceNormal);
                 })
                 .ScheduleParallel();
             BoidForwardRaycastComponent.writerHandle = Dependency;

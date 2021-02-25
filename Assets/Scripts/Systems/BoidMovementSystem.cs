@@ -29,6 +29,9 @@ public class BoidMovementSystem : SystemBase
         ) => {
             // velocity.Value *= steeringDataCaptured.drag; // TODO enable drag
             velocity.Linear += acceleration.Value * deltaTime;
+            if (math.length(velocity.Linear) < steeringDataCaptured.minSpeed) {
+                velocity.Linear = math.normalizesafe(velocity.Linear) * steeringDataCaptured.minSpeed;
+            }
             rotation.Value = quaternion.LookRotationSafe(velocity.Linear, up);
         }).ScheduleParallel();
     }

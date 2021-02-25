@@ -1,6 +1,7 @@
 using System;
 using Unity.Mathematics;
 using UnityEngine;
+using UnityEngine.Serialization;
 
 [Serializable]
 public struct FlockingData {
@@ -9,13 +10,11 @@ public struct FlockingData {
     public float cohesionFactor;
     public float alignmentFactor;
     public float flockingFactor;
-    public float boundsFactor;
     public float3 target;
     public float targetFactor;
     public float maxAcceleration;
-    public float minAcceleration;
+    public float minSpeed;
     public float drag;
-    public float worldSize;
     public bool isDebugEnabled;
     public float lookForwardDistance;
     public float obstacleAvoidanceFactor;

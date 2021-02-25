@@ -66,38 +66,29 @@ public class BoidFlockingSystem : SystemBase {
         
         var target = (steeringConfig.target - position) * steeringConfig.targetFactor;
 
-        var bounds = float3.zero;
-        if (math.abs(translation.Value.x) > steeringConfig.worldSize)
-            bounds.x = steeringConfig.worldSize - translation.Value.x;
-        if (math.abs(translation.Value.y) > steeringConfig.worldSize)
-            bounds.y = steeringConfig.worldSize - translation.Value.y;
-        if (math.abs(translation.Value.z) > steeringConfig.worldSize)
-            bounds.z = steeringConfig.worldSize - translation.Value.z;
-        bounds *= steeringConfig.boundsFactor;
-
         var obstacleAvoidance = float3.zero;
-        if (math.all(rayResult.surfaceNormal != float3.zero)) {
+        if (math.any(rayResult.surfaceNormal != float3.zero)) {
             var dirToHit = rayResult.hitPosition - position;
             var reflection = math.reflect(dirToHit, rayResult.surfaceNormal);
-            obstacleAvoidance = reflection + steeringConfig.obstacleAvoidanceFactor;
+            obstacleAvoidance = rayResult.surfaceNormal * steeringConfig.obstacleAvoidanceFactor;
+            if (steeringConfig.isDebugEnabled) {
+                Debug.DrawRay(position, dirToHit, Color.white);
+                Debug.DrawRay(rayResult.hitPosition, obstacleAvoidance, Color.magenta);
+            }
         }
 
         if (steeringConfig.isDebugEnabled) {
-            Debug.DrawRay(position, alignment, Color.green);
-            Debug.DrawRay(position, avoidance, Color.red);
-            Debug.DrawRay(position, cohesion, Color.yellow);
-            Debug.DrawRay(position, target, Color.blue);
-            Debug.DrawRay(position, bounds, Color.magenta);
+            // Debug.DrawRay(position, alignment, Color.green);
+            // Debug.DrawRay(position, avoidance, Color.red);
+            // Debug.DrawRay(position, cohesion, Color.yellow);
+            // Debug.DrawRay(position, target, Color.blue);
         }
 
         BoidAccelerationComponent acceleration;
-        acceleration.Value = (alignment + avoidance + cohesion + target + bounds + obstacleAvoidance) * steeringConfig.flockingFactor;
+        acceleration.Value = (alignment + avoidance + cohesion + target + obstacleAvoidance) * steeringConfig.flockingFactor;
         float accelLength = math.length(acceleration.Value);
         if (accelLength > steeringConfig.maxAcceleration) {
             acceleration.Value = math.normalizesafe(acceleration.Value) * steeringConfig.maxAcceleration;
-        }
-        else if (accelLength < steeringConfig.minAcceleration) {
-            acceleration.Value = math.normalizesafe(acceleration.Value, new float3(1,1,1)) * steeringConfig.minAcceleration;
         }
 
         return acceleration;

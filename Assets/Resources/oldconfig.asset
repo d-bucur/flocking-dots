@@ -10,22 +10,24 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: f0fa1a919f031d2408f8d45198ff8e24, type: 3}
-  m_Name: SteeringConfig
+  m_Name: oldconfig
   m_EditorClassIdentifier: 
   data:
-    senseRange: 15
-    avoidanceFactor: 5
-    cohesionFactor: 100
-    alignmentFactor: 3
-    flockingFactor: 100
+    senseRange: 4.07
+    avoidanceFactor: 30
+    cohesionFactor: 48.68
+    alignmentFactor: 84.7
+    flockingFactor: 143.2
+    boundsFactor: 70.3
     target:
       x: 0
       y: 0
       z: 0
     targetFactor: 0
-    maxAcceleration: 50
-    minSpeed: 10
+    maxAcceleration: 24.6
+    minAcceleration: 0.8
     drag: 0.9
+    worldSize: 16
     isDebugEnabled: 0
-    lookForwardDistance: 10
-    obstacleAvoidanceFactor: 300
+    lookForwardDistance: 15
+    obstacleAvoidanceFactor: 0

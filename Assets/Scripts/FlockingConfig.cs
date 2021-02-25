@@ -14,7 +14,6 @@ public struct FlockingData {
     public float targetFactor;
     public float maxAcceleration;
     public float minSpeed;
-    public float drag;
     public bool isDebugEnabled;
     public float lookForwardDistance;
     public float obstacleAvoidanceFactor;

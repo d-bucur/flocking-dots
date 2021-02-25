@@ -40,10 +40,6 @@
                     
                     result.hitPosition = hit.Position;
                     result.surfaceNormal = hit.SurfaceNormal;
-                    
-                    if (!steeringData.isDebugEnabled) return;
-                    var dirToHit = hit.Position - position;
-                    var reflection = math.reflect(dirToHit, hit.SurfaceNormal);
                 })
                 .ScheduleParallel();
             BoidForwardRaycastComponent.writerHandle = Dependency;

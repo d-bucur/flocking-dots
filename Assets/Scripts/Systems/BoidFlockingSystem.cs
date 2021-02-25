@@ -70,7 +70,7 @@ public class BoidFlockingSystem : SystemBase {
         if (math.any(rayResult.surfaceNormal != float3.zero)) {
             var dirToHit = rayResult.hitPosition - position;
             var reflection = math.reflect(dirToHit, rayResult.surfaceNormal);
-            obstacleAvoidance = rayResult.surfaceNormal * steeringConfig.obstacleAvoidanceFactor;
+            obstacleAvoidance = reflection * steeringConfig.obstacleAvoidanceFactor;
             if (steeringConfig.isDebugEnabled) {
                 Debug.DrawRay(position, dirToHit, Color.white);
                 Debug.DrawRay(rayResult.hitPosition, obstacleAvoidance, Color.magenta);
@@ -78,10 +78,10 @@ public class BoidFlockingSystem : SystemBase {
         }
 
         if (steeringConfig.isDebugEnabled) {
-            // Debug.DrawRay(position, alignment, Color.green);
-            // Debug.DrawRay(position, avoidance, Color.red);
-            // Debug.DrawRay(position, cohesion, Color.yellow);
-            // Debug.DrawRay(position, target, Color.blue);
+            Debug.DrawRay(position, alignment, Color.green);
+            Debug.DrawRay(position, avoidance, Color.red);
+            Debug.DrawRay(position, cohesion, Color.yellow);
+            Debug.DrawRay(position, target, Color.blue);
         }
 
         BoidAccelerationComponent acceleration;

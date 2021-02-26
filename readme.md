@@ -12,7 +12,7 @@ Playing around with the DOTS preview package + physics to create a massively par
 - **Space** to spawn more boids
 
 ## Details
-Pure ECS with parallel jobs. Can handle around 6k boids @ 60 FSP and almost 100% CPU usage
+Pure ECS with parallel jobs. Can handle around 6k boids @ 60 FPS and almost 100% CPU usage
 
 Configuration parameters can be tweaked in Resources/SteeringConfig
 

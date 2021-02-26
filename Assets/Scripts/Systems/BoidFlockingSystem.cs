@@ -2,6 +2,7 @@ using Unity.Collections;
 using Unity.Entities;
 using Unity.Jobs;
 using Unity.Mathematics;
+using Unity.Physics;
 using Unity.Transforms;
 using UnityEngine;
 
@@ -25,10 +26,10 @@ public class BoidFlockingSystem : SystemBase {
         var jobHandle = Entities
             .WithReadOnly(spatialGrid)
             .WithName("FlockingBehaviours")
-            .ForEach((ref BoidAccelerationComponent acceleration, in Translation translation, in BoidForwardRaycastComponent rayResult) => {
+            .ForEach((ref BoidAccelerationComponent acceleration, in Translation translation, 
+                in BoidForwardRaycastComponent rayResult, in PhysicsVelocity velocity) => {
                 acceleration = CalculateSteeringForces(
-                    translation, steeringDataCaptured, spatialGrid, rayResult
-                    );
+                    translation, steeringDataCaptured, spatialGrid, rayResult, velocity);
             })
             .ScheduleParallel(inputDependencies);
         Dependency = JobHandle.CombineDependencies(Dependency, jobHandle);
@@ -36,7 +37,7 @@ public class BoidFlockingSystem : SystemBase {
 
     private static BoidAccelerationComponent CalculateSteeringForces(in Translation translation,
         in FlockingData steeringConfig, in NativeMultiHashMap<int3, SpatialMapSingleValue> spatialGrid,
-        BoidForwardRaycastComponent rayResult) {
+        in BoidForwardRaycastComponent rayResult, in PhysicsVelocity velocity) {
         var position = translation.Value;
         var avoidance = float3.zero;
         var cohesion = position;
@@ -78,19 +79,15 @@ public class BoidFlockingSystem : SystemBase {
         }
 
         if (steeringConfig.isDebugEnabled) {
-            Debug.DrawRay(position, alignment, Color.green);
-            Debug.DrawRay(position, avoidance, Color.red);
-            Debug.DrawRay(position, cohesion, Color.yellow);
-            Debug.DrawRay(position, target, Color.blue);
+            // Debug.DrawRay(position, alignment, Color.green);
+            // Debug.DrawRay(position, avoidance, Color.red);
+            // Debug.DrawRay(position, cohesion, Color.yellow);
+            // Debug.DrawRay(position, target, Color.blue);
         }
 
-        BoidAccelerationComponent acceleration;
-        acceleration.Value = (alignment + avoidance + cohesion + target + obstacleAvoidance) * steeringConfig.flockingFactor;
-        float accelLength = math.length(acceleration.Value);
-        if (accelLength > steeringConfig.maxAcceleration) {
-            acceleration.Value = math.normalizesafe(acceleration.Value) * steeringConfig.maxAcceleration;
-        }
-
-        return acceleration;
+        var desiredVelocity = alignment + avoidance + cohesion + target + obstacleAvoidance;
+        return new BoidAccelerationComponent {
+            Value = math.normalizesafe(desiredVelocity - velocity.Linear) * steeringConfig.maxAcceleration
+        };
     }
 }

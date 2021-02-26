@@ -9,11 +9,9 @@ public struct FlockingData {
     public float avoidanceFactor;
     public float cohesionFactor;
     public float alignmentFactor;
-    public float flockingFactor;
     public float3 target;
     public float targetFactor;
     public float maxAcceleration;
-    public float minSpeed;
     public bool isDebugEnabled;
     public float lookForwardDistance;
     public float obstacleAvoidanceFactor;

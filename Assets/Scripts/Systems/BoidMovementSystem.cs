@@ -27,11 +27,7 @@ public class BoidMovementSystem : SystemBase
             in BoidTag tag, 
             in BoidAccelerationComponent acceleration
         ) => {
-            // velocity.Value *= steeringDataCaptured.drag; // TODO enable drag
             velocity.Linear += acceleration.Value * deltaTime;
-            if (math.length(velocity.Linear) < steeringDataCaptured.minSpeed) {
-                velocity.Linear = math.normalizesafe(velocity.Linear) * steeringDataCaptured.minSpeed;
-            }
             rotation.Value = quaternion.LookRotationSafe(velocity.Linear, up);
         }).ScheduleParallel();
     }

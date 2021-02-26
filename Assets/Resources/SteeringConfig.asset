@@ -14,17 +14,15 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   data:
     senseRange: 15
-    avoidanceFactor: 1.43
-    cohesionFactor: 204.78
-    alignmentFactor: 98.5
-    flockingFactor: 1
+    avoidanceFactor: 2
+    cohesionFactor: 100
+    alignmentFactor: 10
     target:
       x: -1
       y: 8
       z: 33
-    targetFactor: 165.78
-    maxAcceleration: 16.43
-    minSpeed: 0
+    targetFactor: 5
+    maxAcceleration: 15
     isDebugEnabled: 0
     lookForwardDistance: 20
-    obstacleAvoidanceFactor: 100
+    obstacleAvoidanceFactor: 300

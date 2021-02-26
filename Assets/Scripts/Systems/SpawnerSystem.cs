@@ -10,7 +10,6 @@
 
         protected override void OnCreate() {
             base.OnCreate();
-            Application.targetFrameRate = 30;
             _ecbSystem = World.GetOrCreateSystem<EndSimulationEntityCommandBufferSystem>();
         }
 

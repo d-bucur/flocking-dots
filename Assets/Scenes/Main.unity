@@ -1169,7 +1169,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   prefab: {fileID: 1167617768403215154, guid: 65f0f98bf4aa4f84c86682df3bf2de7b, type: 3}
-  batchSize: 1
+  batchSize: 10
 --- !u!4 &91032749
 Transform:
   m_ObjectHideFlags: 0
